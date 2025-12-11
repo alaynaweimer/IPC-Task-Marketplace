@@ -602,23 +602,9 @@
                     <span id="status-text">Not connected</span>
                 </div>
                 <button class="btn-icon" onclick="refreshAll()" title="Refresh">↻</button>
-                <button class="btn btn-secondary" onclick="toggleSetup()">⚙️ Setup</button>
+                <button class="btn btn-secondary" onclick="loadAllData()">↻</button>
             </div>
         </header>
-
-        <!-- Setup Panel -->
-        <div class="setup-panel" id="setup-panel">
-            <div class="setup-title">📊 Connect Google Sheets</div>
-            <p class="setup-description">Add Sheet IDs for each client/project. Each sheet needs: Programs, Tasks, Team tabs.</p>
-            
-            <div class="sheets-config" id="sheets-config"></div>
-            <button class="add-btn" onclick="addSheetRow()">+ Add Sheet</button>
-
-            <div class="setup-actions">
-                <button class="btn btn-primary" onclick="saveAndConnect()">💾 Save & Connect</button>
-                <button class="btn btn-secondary" onclick="loadDemo()">📋 Load Demo</button>
-            </div>
-        </div>
 
         <!-- Welcome Banner -->
         <div class="welcome-banner" id="welcome-banner">
@@ -697,9 +683,8 @@
         <!-- Tasks Grid -->
         <div class="tasks-grid" id="tasks-grid">
             <div class="empty-state">
-                <div class="empty-state-icon">⚙️</div>
-                <h3>Connect Your Sheets</h3>
-                <p>Click Setup to add your Google Sheet IDs and start browsing tasks.</p>
+                <div class="empty-state-icon">📊</div>
+                <h3>Loading tasks...</h3>
             </div>
         </div>
     </div>
@@ -731,11 +716,14 @@
         // Init
         document.addEventListener('DOMContentLoaded', () => {
             loadConfig();
-            renderSetupUI();
+            loadAllData();
+        });
+        
+        function loadAllData() {
             if (config.sheets.length > 0 && config.sheets[0].sheetId) {
                 connectAll();
             }
-        });
+        }
 
         function loadConfig() {
             // Always use hardcoded DEFAULT_CONFIG - skip localStorage
@@ -749,72 +737,6 @@
         /* ================================================================
            SETUP UI
            ================================================================ */
-
-        function toggleSetup() {
-            document.getElementById('setup-panel').classList.toggle('active');
-        }
-
-        function renderSetupUI() {
-            const container = document.getElementById('sheets-config');
-            if (config.sheets.length === 0) {
-                container.innerHTML = sheetRowHTML(0);
-            } else {
-                container.innerHTML = config.sheets.map((s, i) => sheetRowHTML(i, s)).join('');
-            }
-        }
-
-        function sheetRowHTML(index, sheet = { name: '', sheetId: '', color: '#d4a853' }) {
-            return `
-                <div class="sheet-row" data-index="${index}">
-                    <input type="text" class="form-input sheet-name" placeholder="Client/Project Name" value="${sheet.name || ''}">
-                    <input type="text" class="form-input sheet-id" placeholder="Google Sheet ID" value="${sheet.sheetId || ''}">
-                    <input type="color" class="color-input sheet-color" value="${sheet.color || '#d4a853'}">
-                    <button class="remove-btn" onclick="removeSheetRow(${index})">×</button>
-                </div>
-            `;
-        }
-
-        function addSheetRow() {
-            const container = document.getElementById('sheets-config');
-            const index = container.children.length;
-            container.insertAdjacentHTML('beforeend', sheetRowHTML(index));
-        }
-
-        function removeSheetRow(index) {
-            const rows = document.querySelectorAll('.sheet-row');
-            if (rows.length > 1) {
-                rows[index].remove();
-            }
-        }
-
-        function saveAndConnect() {
-            config.sheets = [];
-            document.querySelectorAll('.sheet-row').forEach(row => {
-                const name = row.querySelector('.sheet-name').value.trim();
-                const sheetId = row.querySelector('.sheet-id').value.trim();
-                const color = row.querySelector('.sheet-color').value;
-                if (name && sheetId) {
-                    config.sheets.push({ name, sheetId, color });
-                }
-            });
-            saveConfig();
-            if (config.sheets.length > 0) {
-                connectAll();
-            }
-            document.getElementById('setup-panel').classList.remove('active');
-        }
-
-        function loadDemo() {
-            config.sheets = [
-                { name: 'IPC-IEF Operations', sheetId: '1_AAjePsJq1u2KlAWm8ol_0iQkK16_WJl', color: '#d4a853' },
-                { name: 'Treehouse Therapies', sheetId: '1JE6ngi9t8oNKPqZ3I_NjrC90WCdkmVNr', color: '#4A90A4' },
-                { name: 'In Reach Therapy', sheetId: '1Pp-brDjxPdstNGEnQOOuWa90flXL72tw', color: '#6B8E23' }
-            ];
-            saveConfig();
-            renderSetupUI();
-            connectAll();
-            document.getElementById('setup-panel').classList.remove('active');
-        }
 
         /* ================================================================
            DATA LOADING
