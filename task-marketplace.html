@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPC Task Marketplace</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --bg-elevated: #22222e;
+            --accent-gold: #d4a853;
+            --accent-gold-dim: #b8923f;
+            --accent-emerald: #34d399;
+            --accent-rose: #fb7185;
+            --accent-sky: #38bdf8;
+            --accent-violet: #a78bfa;
+            --accent-amber: #fbbf24;
+            --accent-teal: #2dd4bf;
+            --text-primary: #f8f8f8;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --border-subtle: rgba(255,255,255,0.08);
+            --border-accent: rgba(212,168,83,0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .header-left h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-emerald));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-right: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+        }
+
+        .status-dot.connected { background: var(--accent-emerald); }
+        .status-dot.error { background: var(--accent-rose); }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dim));
+            color: var(--bg-primary);
+        }
+
+        .btn-secondary {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .btn-message {
+            background: linear-gradient(135deg, var(--accent-emerald), var(--accent-teal));
+            color: var(--bg-primary);
+            padding: 0.35rem 0.6rem;
+            font-size: 0.65rem;
+        }
+
+        .btn-icon {
+            padding: 0.4rem 0.5rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        /* Welcome Banner */
+        .welcome-banner {
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-elevated));
+            border: 1px solid var(--border-accent);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .welcome-icon {
+            font-size: 2rem;
+        }
+
+        .welcome-content h2 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .welcome-content p {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            flex: 1;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .stat-value.gold { color: var(--accent-gold); }
+        .stat-value.emerald { color: var(--accent-emerald); }
+        .stat-value.sky { color: var(--accent-sky); }
+        .stat-value.rose { color: var(--accent-rose); }
+
+        .stat-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-top: 0.25rem;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .filter-label {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .filter-select {
+            padding: 0.4rem 0.6rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            color: var(--text-primary);
+            font-size: 0.75rem;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            min-width: 130px;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 180px;
+            max-width: 280px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.4rem 0.6rem 0.4rem 1.8rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            color: var(--text-primary);
+            font-size: 0.75rem;
+        }
+
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 0.6rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.65rem;
+            opacity: 0.5;
+        }
+
+        .clear-filters {
+            font-size: 0.7rem;
+            color: var(--accent-gold);
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+        }
+
+        /* Category Pills */
+        .category-pills {
+            display: flex;
+            gap: 0.4rem;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        .category-pill {
+            padding: 0.4rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+        }
+
+        .category-pill:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .category-pill.active {
+            background: var(--accent-gold);
+            color: var(--bg-primary);
+            border-color: var(--accent-gold);
+        }
+
+        .category-pill .count {
+            background: rgba(0,0,0,0.2);
+            padding: 0.1rem 0.4rem;
+            border-radius: 10px;
+            margin-left: 0.3rem;
+            font-size: 0.6rem;
+        }
+
+        .category-pill.active .count {
+            background: rgba(0,0,0,0.3);
+        }
+
+        /* Task Grid */
+        .tasks-grid {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .task-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 1rem;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .task-card:hover {
+            border-color: var(--border-accent);
+            transform: translateY(-1px);
+        }
+
+        .task-card.assigned {
+            opacity: 0.6;
+        }
+
+        .task-priority {
+            width: 4px;
+            height: 100%;
+            min-height: 50px;
+            border-radius: 2px;
+        }
+
+        .task-priority.high { background: var(--accent-rose); }
+        .task-priority.medium { background: var(--accent-amber); }
+        .task-priority.low { background: var(--accent-emerald); }
+
+        .task-content {
+            min-width: 0;
+        }
+
+        .task-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .task-client {
+            font-size: 0.55rem;
+            padding: 0.15rem 0.45rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .task-category {
+            font-size: 0.55rem;
+            padding: 0.15rem 0.45rem;
+            border-radius: 4px;
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+        }
+
+        .task-status {
+            font-size: 0.5rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 10px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .task-status.unassigned {
+            background: rgba(52,211,153,0.15);
+            color: var(--accent-emerald);
+        }
+
+        .task-status.assigned {
+            background: rgba(156,163,175,0.15);
+            color: var(--text-muted);
+        }
+
+        .task-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .task-project {
+            font-size: 0.7rem;
+            color: var(--accent-gold);
+            margin-bottom: 0.25rem;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .task-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .task-due.overdue { color: var(--accent-rose); font-weight: 600; }
+        .task-due.soon { color: var(--accent-amber); }
+
+        .task-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            align-items: flex-end;
+        }
+
+        .lead-info {
+            text-align: right;
+            margin-bottom: 0.3rem;
+        }
+
+        .lead-name {
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .lead-label {
+            font-size: 0.55rem;
+            color: var(--text-muted);
+        }
+
+        .contact-buttons {
+            display: flex;
+            gap: 0.3rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        /* Setup Panel */
+        .setup-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-accent);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .setup-panel.active { display: block; }
+
+        .setup-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent-gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .setup-description {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .sheets-config {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .sheet-row {
+            display: grid;
+            grid-template-columns: 180px 1fr 80px auto;
+            gap: 0.5rem;
+            align-items: center;
+            padding: 0.5rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+        }
+
+        .form-input {
+            padding: 0.45rem 0.65rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            color: var(--text-primary);
+            font-size: 0.75rem;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .color-input {
+            width: 100%;
+            height: 30px;
+            padding: 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .remove-btn {
+            background: none;
+            border: none;
+            color: var(--accent-rose);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .add-btn {
+            background: transparent;
+            border: 1px dashed var(--border-subtle);
+            border-radius: 6px;
+            padding: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            cursor: pointer;
+            width: fit-content;
+        }
+
+        .add-btn:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .setup-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .task-card {
+                grid-template-columns: auto 1fr;
+            }
+            .task-actions {
+                grid-column: 1 / -1;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 0.5rem;
+                padding-top: 0.5rem;
+                border-top: 1px solid var(--border-subtle);
+            }
+            .lead-info { text-align: left; margin-bottom: 0; }
+        }
+
+        @media (max-width: 600px) {
+            .stats-bar { flex-wrap: wrap; }
+            .stat-card { min-width: calc(50% - 0.5rem); }
+            .filter-bar { flex-direction: column; align-items: stretch; }
+            .filter-group { width: 100%; }
+            .filter-select { width: 100%; }
+            .search-box { max-width: none; }
+            .sheet-row { grid-template-columns: 1fr; }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        ::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-left">
+                <h1>🛒 Task Marketplace</h1>
+                <p class="header-subtitle">Find tasks • Request work • Grow your skills</p>
+            </div>
+            <div class="header-actions">
+                <div class="connection-status">
+                    <span class="status-dot" id="status-dot"></span>
+                    <span id="status-text">Not connected</span>
+                </div>
+                <button class="btn-icon" onclick="refreshAll()" title="Refresh">↻</button>
+                <button class="btn btn-secondary" onclick="toggleSetup()">⚙️ Setup</button>
+            </div>
+        </header>
+
+        <!-- Setup Panel -->
+        <div class="setup-panel" id="setup-panel">
+            <div class="setup-title">📊 Connect Google Sheets</div>
+            <p class="setup-description">Add Sheet IDs for each client/project. Each sheet needs: Programs, Tasks, Team tabs.</p>
+            
+            <div class="sheets-config" id="sheets-config"></div>
+            <button class="add-btn" onclick="addSheetRow()">+ Add Sheet</button>
+
+            <div class="setup-actions">
+                <button class="btn btn-primary" onclick="saveAndConnect()">💾 Save & Connect</button>
+                <button class="btn btn-secondary" onclick="loadDemo()">📋 Load Demo</button>
+            </div>
+        </div>
+
+        <!-- Welcome Banner -->
+        <div class="welcome-banner" id="welcome-banner">
+            <div class="welcome-icon">👋</div>
+            <div class="welcome-content">
+                <h2>Welcome to the Task Marketplace!</h2>
+                <p>Browse available tasks below. Filter by category to find work that matches your skills. Click "Message Lead" to request a task.</p>
+            </div>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar" id="stats-bar" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-value gold" id="stat-total">0</div>
+                <div class="stat-label">Total Tasks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value emerald" id="stat-available">0</div>
+                <div class="stat-label">Available</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value sky" id="stat-assigned">0</div>
+                <div class="stat-label">Assigned</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value rose" id="stat-urgent">0</div>
+                <div class="stat-label">Due This Week</div>
+            </div>
+        </div>
+
+        <!-- Category Pills -->
+        <div class="category-pills" id="category-pills" style="display: none;">
+            <button class="category-pill active" data-category="all" onclick="filterCategory('all')">All Tasks</button>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar" id="filter-bar" style="display: none;">
+            <div class="filter-group">
+                <span class="filter-label">Client</span>
+                <select class="filter-select" id="filter-client" onchange="applyFilters()">
+                    <option value="">All Clients</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <span class="filter-label">Priority</span>
+                <select class="filter-select" id="filter-priority" onchange="applyFilters()">
+                    <option value="">All</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <span class="filter-label">Status</span>
+                <select class="filter-select" id="filter-status" onchange="applyFilters()">
+                    <option value="">All</option>
+                    <option value="unassigned">Available Only</option>
+                    <option value="assigned">Assigned Only</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <span class="filter-label">Due</span>
+                <select class="filter-select" id="filter-due" onchange="applyFilters()">
+                    <option value="">Any Time</option>
+                    <option value="overdue">Overdue</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                </select>
+            </div>
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search tasks..." oninput="applyFilters()">
+            </div>
+            <button class="clear-filters" onclick="clearFilters()">Clear All</button>
+        </div>
+
+        <!-- Tasks Grid -->
+        <div class="tasks-grid" id="tasks-grid">
+            <div class="empty-state">
+                <div class="empty-state-icon">⚙️</div>
+                <h3>Connect Your Sheets</h3>
+                <p>Click Setup to add your Google Sheet IDs and start browsing tasks.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ================================================================
+           CONFIGURATION
+           ================================================================ */
+        
+        const CONFIG_KEY = 'ipc-task-marketplace';
+        
+        let config = {
+            sheets: [
+                { name: 'IPC-IEF Operations', sheetId: '1_AAjePsJq1u2KlAWm8ol_0iQkK16_WJl', color: '#d4a853' },
+                { name: 'Treehouse Therapies', sheetId: '1JE6ngi9t8oNKPqZ3I_NjrC90WCdkmVNr', color: '#4A90A4' },
+                { name: 'In Reach Therapy', sheetId: '1Pp-brDjxPdstNGEnQOOuWa90flXL72tw', color: '#6B8E23' }
+            ]
+        };
+
+        let state = {
+            allTasks: [],
+            categories: [],
+            leads: {},
+            filters: { category: 'all', client: '', priority: '', status: '', due: '', search: '' }
+        };
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            loadConfig();
+            renderSetupUI();
+            if (config.sheets.length > 0 && config.sheets[0].sheetId) {
+                connectAll();
+            }
+        });
+
+        function loadConfig() {
+            const stored = localStorage.getItem(CONFIG_KEY);
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                if (parsed.sheets && parsed.sheets.length > 0) {
+                    config = parsed;
+                }
+            }
+        }
+
+        function saveConfig() {
+            localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+        }
+
+        /* ================================================================
+           SETUP UI
+           ================================================================ */
+
+        function toggleSetup() {
+            document.getElementById('setup-panel').classList.toggle('active');
+        }
+
+        function renderSetupUI() {
+            const container = document.getElementById('sheets-config');
+            if (config.sheets.length === 0) {
+                container.innerHTML = sheetRowHTML(0);
+            } else {
+                container.innerHTML = config.sheets.map((s, i) => sheetRowHTML(i, s)).join('');
+            }
+        }
+
+        function sheetRowHTML(index, sheet = { name: '', sheetId: '', color: '#d4a853' }) {
+            return `
+                <div class="sheet-row" data-index="${index}">
+                    <input type="text" class="form-input sheet-name" placeholder="Client/Project Name" value="${sheet.name || ''}">
+                    <input type="text" class="form-input sheet-id" placeholder="Google Sheet ID" value="${sheet.sheetId || ''}">
+                    <input type="color" class="color-input sheet-color" value="${sheet.color || '#d4a853'}">
+                    <button class="remove-btn" onclick="removeSheetRow(${index})">×</button>
+                </div>
+            `;
+        }
+
+        function addSheetRow() {
+            const container = document.getElementById('sheets-config');
+            const index = container.children.length;
+            container.insertAdjacentHTML('beforeend', sheetRowHTML(index));
+        }
+
+        function removeSheetRow(index) {
+            const rows = document.querySelectorAll('.sheet-row');
+            if (rows.length > 1) {
+                rows[index].remove();
+            }
+        }
+
+        function saveAndConnect() {
+            config.sheets = [];
+            document.querySelectorAll('.sheet-row').forEach(row => {
+                const name = row.querySelector('.sheet-name').value.trim();
+                const sheetId = row.querySelector('.sheet-id').value.trim();
+                const color = row.querySelector('.sheet-color').value;
+                if (name && sheetId) {
+                    config.sheets.push({ name, sheetId, color });
+                }
+            });
+            saveConfig();
+            if (config.sheets.length > 0) {
+                connectAll();
+            }
+            document.getElementById('setup-panel').classList.remove('active');
+        }
+
+        function loadDemo() {
+            config.sheets = [
+                { name: 'IPC-IEF Operations', sheetId: '1_AAjePsJq1u2KlAWm8ol_0iQkK16_WJl', color: '#d4a853' },
+                { name: 'Treehouse Therapies', sheetId: '1JE6ngi9t8oNKPqZ3I_NjrC90WCdkmVNr', color: '#4A90A4' },
+                { name: 'In Reach Therapy', sheetId: '1Pp-brDjxPdstNGEnQOOuWa90flXL72tw', color: '#6B8E23' }
+            ];
+            saveConfig();
+            renderSetupUI();
+            connectAll();
+            document.getElementById('setup-panel').classList.remove('active');
+        }
+
+        /* ================================================================
+           DATA LOADING
+           ================================================================ */
+
+        async function connectAll() {
+            updateStatus('connecting');
+            state.allTasks = [];
+            state.leads = {};
+            let connected = 0;
+
+            for (const sheet of config.sheets) {
+                try {
+                    const [programs, tasks, team] = await Promise.all([
+                        fetchSheet(sheet.sheetId, 'Programs'),
+                        fetchSheet(sheet.sheetId, 'Tasks'),
+                        fetchSheet(sheet.sheetId, 'Team')
+                    ]);
+
+                    const programsData = parsePrograms(programs);
+                    const tasksData = parseTasks(tasks);
+                    const teamData = parseTeam(team);
+
+                    // Store leads
+                    teamData.forEach(t => {
+                        state.leads[t.name.toLowerCase()] = t;
+                    });
+                    programsData.forEach(p => {
+                        if (p.lead && !state.leads[p.lead.toLowerCase()]) {
+                            state.leads[p.lead.toLowerCase()] = { name: p.lead, contact: '' };
+                        }
+                    });
+
+                    // Add client info to tasks
+                    tasksData.forEach(t => {
+                        const program = programsData.find(p => p.name.toLowerCase() === t.programName.toLowerCase());
+                        t.clientName = sheet.name;
+                        t.clientColor = sheet.color;
+                        t.lead = program?.lead || '';
+                        state.allTasks.push(t);
+                    });
+
+                    connected++;
+                } catch (e) {
+                    console.error(`Failed to load ${sheet.name}:`, e);
+                }
+            }
+
+            if (connected > 0) {
+                updateStatus('connected', connected);
+                buildCategories();
+                populateFilters();
+                showDashboard();
+                renderTasks();
+            } else {
+                updateStatus('error');
+            }
+        }
+
+        async function fetchSheet(sheetId, name) {
+            const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}`;
+            const res = await fetch(url);
+            const text = await res.text();
+            const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
+            if (!match) throw new Error('Invalid response');
+            return JSON.parse(match[1]).table;
+        }
+
+        function parsePrograms(table) {
+            if (!table.rows) return [];
+            const cols = table.cols.map(c => (c.label || '').toLowerCase());
+            return table.rows.map(row => {
+                const get = (col) => {
+                    const idx = cols.findIndex(c => c.includes(col));
+                    return idx >= 0 && row.c[idx] ? (row.c[idx].v || row.c[idx].f || '') : '';
+                };
+                return {
+                    name: get('program') || get('project') || get('name'),
+                    lead: get('lead') || get('owner')
+                };
+            }).filter(p => p.name);
+        }
+
+        function parseTasks(table) {
+            if (!table.rows) return [];
+            const cols = table.cols.map(c => (c.label || '').toLowerCase());
+            return table.rows.map((row, i) => {
+                const get = (col) => {
+                    const idx = cols.findIndex(c => c.includes(col));
+                    return idx >= 0 && row.c[idx] ? (row.c[idx].v || row.c[idx].f || '') : '';
+                };
+                const status = (get('status') || '').toLowerCase();
+                const assigneeRaw = get('assign') || get('owner') || '';
+                // Handle multi-select (comma-separated or chip format)
+                const assignees = assigneeRaw.split(',').map(a => a.trim()).filter(Boolean);
+                return {
+                    id: i + 1,
+                    programName: get('program') || get('project'),
+                    name: get('task') || get('name'),
+                    assignee: assignees.join(', '),
+                    assignees: assignees,
+                    dueDate: get('due'),
+                    priority: (get('priority') || 'medium').toLowerCase(),
+                    category: get('category') || get('type') || 'Other',
+                    completed: ['complete', 'completed', 'done'].includes(status),
+                    isAssigned: assignees.length > 0
+                };
+            }).filter(t => t.name && !t.completed);
+        }
+
+        function parseTeam(table) {
+            if (!table.rows) return [];
+            const cols = table.cols.map(c => (c.label || '').toLowerCase());
+            return table.rows.map(row => {
+                const get = (col) => {
+                    const idx = cols.findIndex(c => c.includes(col));
+                    return idx >= 0 && row.c[idx] ? (row.c[idx].v || row.c[idx].f || '') : '';
+                };
+                const name = get('team name') || get('name');
+                if (!name) return null;
+                return {
+                    name: name,
+                    role: get('team role') || get('role') || get('title'),
+                    contact: get('team contact') || get('contact') || get('email') || ''
+                };
+            }).filter(t => t && t.name);
+        }
+
+        function refreshAll() {
+            if (config.sheets.length > 0) {
+                connectAll();
+            }
+        }
+
+        /* ================================================================
+           UI FUNCTIONS
+           ================================================================ */
+
+        function updateStatus(s, count = 0) {
+            const dot = document.getElementById('status-dot');
+            const txt = document.getElementById('status-text');
+            dot.className = 'status-dot';
+            if (s === 'connecting') { txt.textContent = 'Connecting...'; }
+            else if (s === 'connected') { dot.classList.add('connected'); txt.textContent = `${count} sheets connected`; }
+            else if (s === 'error') { dot.classList.add('error'); txt.textContent = 'Connection failed'; }
+            else { txt.textContent = 'Not connected'; }
+        }
+
+        function showDashboard() {
+            document.getElementById('stats-bar').style.display = 'flex';
+            document.getElementById('category-pills').style.display = 'flex';
+            document.getElementById('filter-bar').style.display = 'flex';
+        }
+
+        function buildCategories() {
+            const cats = {};
+            state.allTasks.forEach(t => {
+                const cat = t.category || 'Other';
+                cats[cat] = (cats[cat] || 0) + 1;
+            });
+            state.categories = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+
+            const container = document.getElementById('category-pills');
+            container.innerHTML = `
+                <button class="category-pill active" data-category="all" onclick="filterCategory('all')">
+                    All Tasks <span class="count">${state.allTasks.length}</span>
+                </button>
+                ${state.categories.map(([cat, count]) => `
+                    <button class="category-pill" data-category="${cat}" onclick="filterCategory('${cat}')">
+                        ${cat} <span class="count">${count}</span>
+                    </button>
+                `).join('')}
+            `;
+        }
+
+        function populateFilters() {
+            const clients = [...new Set(state.allTasks.map(t => t.clientName))].sort();
+            document.getElementById('filter-client').innerHTML = 
+                '<option value="">All Clients</option>' + 
+                clients.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+
+        function filterCategory(cat) {
+            state.filters.category = cat;
+            document.querySelectorAll('.category-pill').forEach(p => {
+                p.classList.toggle('active', p.dataset.category === cat);
+            });
+            renderTasks();
+        }
+
+        function applyFilters() {
+            state.filters.client = document.getElementById('filter-client').value;
+            state.filters.priority = document.getElementById('filter-priority').value;
+            state.filters.status = document.getElementById('filter-status').value;
+            state.filters.due = document.getElementById('filter-due').value;
+            state.filters.search = document.getElementById('search-input').value.toLowerCase();
+            renderTasks();
+        }
+
+        function clearFilters() {
+            document.getElementById('filter-client').value = '';
+            document.getElementById('filter-priority').value = '';
+            document.getElementById('filter-status').value = '';
+            document.getElementById('filter-due').value = '';
+            document.getElementById('search-input').value = '';
+            state.filters = { category: state.filters.category, client: '', priority: '', status: '', due: '', search: '' };
+            renderTasks();
+        }
+
+        function getFilteredTasks() {
+            const today = new Date(); today.setHours(0,0,0,0);
+            const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 7);
+            const monthEnd = new Date(today); monthEnd.setMonth(monthEnd.getMonth() + 1);
+
+            return state.allTasks.filter(t => {
+                if (state.filters.category !== 'all' && t.category !== state.filters.category) return false;
+                if (state.filters.client && t.clientName !== state.filters.client) return false;
+                if (state.filters.priority && t.priority !== state.filters.priority) return false;
+                if (state.filters.status === 'unassigned' && t.isAssigned) return false;
+                if (state.filters.status === 'assigned' && !t.isAssigned) return false;
+                
+                if (state.filters.due && t.dueDate) {
+                    const due = new Date(t.dueDate);
+                    if (state.filters.due === 'overdue' && due >= today) return false;
+                    if (state.filters.due === 'week' && due > weekEnd) return false;
+                    if (state.filters.due === 'month' && due > monthEnd) return false;
+                }
+
+                if (state.filters.search) {
+                    const s = state.filters.search;
+                    if (!t.name.toLowerCase().includes(s) && 
+                        !t.programName.toLowerCase().includes(s) &&
+                        !t.clientName.toLowerCase().includes(s) &&
+                        !(t.category || '').toLowerCase().includes(s)) return false;
+                }
+
+                return true;
+            });
+        }
+
+        function renderTasks() {
+            const tasks = getFilteredTasks();
+            const today = new Date(); today.setHours(0,0,0,0);
+            const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 7);
+
+            // Update stats
+            document.getElementById('stat-total').textContent = state.allTasks.length;
+            document.getElementById('stat-available').textContent = state.allTasks.filter(t => !t.isAssigned).length;
+            document.getElementById('stat-assigned').textContent = state.allTasks.filter(t => t.isAssigned).length;
+            document.getElementById('stat-urgent').textContent = state.allTasks.filter(t => 
+                t.dueDate && new Date(t.dueDate) <= weekEnd && !t.isAssigned
+            ).length;
+
+            if (!tasks.length) {
+                document.getElementById('tasks-grid').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <h3>No tasks match your filters</h3>
+                        <p>Try adjusting your filters or browse all tasks.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Sort: unassigned first, then by due date
+            tasks.sort((a, b) => {
+                if (a.isAssigned !== b.isAssigned) return a.isAssigned ? 1 : -1;
+                if (a.dueDate && b.dueDate) return new Date(a.dueDate) - new Date(b.dueDate);
+                return a.dueDate ? -1 : 1;
+            });
+
+            document.getElementById('tasks-grid').innerHTML = tasks.map(t => {
+                const isOverdue = t.dueDate && new Date(t.dueDate) < today;
+                const isSoon = !isOverdue && t.dueDate && new Date(t.dueDate) <= weekEnd;
+                const lead = state.leads[t.lead?.toLowerCase()] || { name: t.lead, contact: '' };
+
+                return `
+                    <div class="task-card ${t.isAssigned ? 'assigned' : ''}">
+                        <div class="task-priority ${t.priority}"></div>
+                        <div class="task-content">
+                            <div class="task-header">
+                                <span class="task-client" style="background: ${t.clientColor}20; color: ${t.clientColor}">${esc(t.clientName)}</span>
+                                <span class="task-category">${esc(t.category || 'Other')}</span>
+                                <span class="task-status ${t.isAssigned ? 'assigned' : 'unassigned'}">
+                                    ${t.isAssigned ? '● Assigned' : '○ Available'}
+                                </span>
+                            </div>
+                            <div class="task-title">${esc(t.name)}</div>
+                            <div class="task-project">📁 ${esc(t.programName)}</div>
+                            <div class="task-meta">
+                                ${t.dueDate ? `<span class="task-due ${isOverdue ? 'overdue' : ''} ${isSoon ? 'soon' : ''}">📅 ${fmtDate(t.dueDate)}${isOverdue ? ' (overdue)' : ''}</span>` : ''}
+                                <span>⚡ ${t.priority.charAt(0).toUpperCase() + t.priority.slice(1)} priority</span>
+                                ${t.isAssigned ? `<span>👤 ${esc(t.assignee)}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <div class="lead-info">
+                                <div class="lead-name">${esc(lead.name || 'No lead')}</div>
+                                <div class="lead-label">Project Lead</div>
+                            </div>
+                            ${lead.name && lead.contact ? `
+                                <div class="contact-buttons">
+                                    <button class="btn btn-message" onclick="openChat('${esc(lead.contact)}', '${esc(t.name)}', '${esc(t.clientName)}')">💬 Chat</button>
+                                    <button class="btn btn-message" style="background: linear-gradient(135deg, var(--accent-sky), var(--accent-violet));" onclick="openEmail('${esc(lead.contact)}', '${esc(t.name)}', '${esc(t.clientName)}')">📧 Email</button>
+                                </div>
+                            ` : lead.name ? `<span style="font-size: 0.6rem; color: var(--text-muted);">No contact info</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openChat(contact, taskName, clientName) {
+            const message = encodeURIComponent(`Hi! I have some availability and would like to help with the task "${taskName}" for ${clientName}. Is this still available?`);
+            
+            if (contact.includes('@')) {
+                // Open Google Chat DM with email
+                window.open(`https://mail.google.com/chat/dm/${contact}?text=${message}`, '_blank');
+            } else {
+                // Copy message to clipboard
+                const fullMessage = `Hi! I have some availability and would like to help with the task "${taskName}" for ${clientName}. Is this still available?`;
+                navigator.clipboard.writeText(fullMessage).then(() => {
+                    alert(`Message copied!\n\nSend via Google Chat to: ${contact}`);
+                });
+            }
+        }
+
+        function openEmail(contact, taskName, clientName) {
+            const subject = encodeURIComponent(`Task Request: ${taskName} - ${clientName}`);
+            const body = encodeURIComponent(`Hi!\n\nI have some availability and would like to help with the task "${taskName}" for ${clientName}.\n\nIs this still available?\n\nThanks!`);
+            
+            if (contact.includes('@')) {
+                window.open(`mailto:${contact}?subject=${subject}&body=${body}`, '_blank');
+            } else {
+                alert(`Please email: ${contact}\n\nSubject: Task Request: ${taskName}`);
+            }
+        }
+
+        // Utils
+        function esc(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+        function fmtDate(s) { if (!s) return '—'; const d = new Date(s); return isNaN(d) ? s : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+    </script>
+</body>
+</html>
