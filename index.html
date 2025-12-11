@@ -711,13 +711,15 @@
         
         const CONFIG_KEY = 'ipc-task-marketplace';
         
-        let config = {
+        const DEFAULT_CONFIG = {
             sheets: [
                 { name: 'IPC-IEF Operations', sheetId: '1_AAjePsJq1u2KlAWm8ol_0iQkK16_WJl', color: '#d4a853' },
                 { name: 'Treehouse Therapies', sheetId: '1JE6ngi9t8oNKPqZ3I_NjrC90WCdkmVNr', color: '#4A90A4' },
                 { name: 'In Reach Therapy', sheetId: '1Pp-brDjxPdstNGEnQOOuWa90flXL72tw', color: '#6B8E23' }
             ]
         };
+        
+        let config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
 
         let state = {
             allTasks: [],
@@ -736,13 +738,8 @@
         });
 
         function loadConfig() {
-            const stored = localStorage.getItem(CONFIG_KEY);
-            if (stored) {
-                const parsed = JSON.parse(stored);
-                if (parsed.sheets && parsed.sheets.length > 0) {
-                    config = parsed;
-                }
-            }
+            // Always use hardcoded DEFAULT_CONFIG - skip localStorage
+            config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
         }
 
         function saveConfig() {
