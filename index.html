@@ -805,12 +805,26 @@
             return JSON.parse(match[1]).table;
         }
 
+        function getHeaders(table) {
+            // Check if column labels exist
+            const colLabels = table.cols.map(c => (c.label || '').toLowerCase()).filter(Boolean);
+            if (colLabels.length > 0) {
+                return { headers: table.cols.map(c => (c.label || '').toLowerCase()), dataRows: table.rows };
+            }
+            // Use first row as headers
+            if (table.rows && table.rows.length > 0) {
+                const headers = table.rows[0].c.map(cell => (cell && cell.v ? String(cell.v) : '').toLowerCase());
+                return { headers, dataRows: table.rows.slice(1) };
+            }
+            return { headers: [], dataRows: [] };
+        }
+
         function parsePrograms(table) {
             if (!table.rows) return [];
-            const cols = table.cols.map(c => (c.label || '').toLowerCase());
-            return table.rows.map(row => {
+            const { headers, dataRows } = getHeaders(table);
+            return dataRows.map(row => {
                 const get = (col) => {
-                    const idx = cols.findIndex(c => c.includes(col));
+                    const idx = headers.findIndex(c => c.includes(col));
                     return idx >= 0 && row.c[idx] ? (row.c[idx].v || row.c[idx].f || '') : '';
                 };
                 return {
@@ -822,10 +836,10 @@
 
         function parseTasks(table) {
             if (!table.rows) return [];
-            const cols = table.cols.map(c => (c.label || '').toLowerCase());
-            return table.rows.map((row, i) => {
+            const { headers, dataRows } = getHeaders(table);
+            return dataRows.map((row, i) => {
                 const get = (col) => {
-                    const idx = cols.findIndex(c => c.includes(col));
+                    const idx = headers.findIndex(c => c.includes(col));
                     return idx >= 0 && row.c[idx] ? (row.c[idx].v || row.c[idx].f || '') : '';
                 };
                 const status = (get('status') || '').toLowerCase();
@@ -849,10 +863,10 @@
 
         function parseTeam(table) {
             if (!table.rows) return [];
-            const cols = table.cols.map(c => (c.label || '').toLowerCase());
-            return table.rows.map(row => {
+            const { headers, dataRows } = getHeaders(table);
+            return dataRows.map(row => {
                 const get = (col) => {
-                    const idx = cols.findIndex(c => c.includes(col));
+                    const idx = headers.findIndex(c => c.includes(col));
                     return idx >= 0 && row.c[idx] ? (row.c[idx].v || row.c[idx].f || '') : '';
                 };
                 const name = get('team name') || get('name');
