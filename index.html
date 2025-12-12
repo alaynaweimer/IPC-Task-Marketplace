@@ -417,6 +417,32 @@
         .task-due.overdue { color: var(--accent-rose); font-weight: 600; }
         .task-due.soon { color: var(--accent-amber); }
 
+        .task-deliverables {
+            margin-top: 0.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        .deliverable-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.35rem 0.6rem;
+            background: linear-gradient(135deg, var(--accent-emerald), var(--accent-sky));
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.65rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .deliverable-link:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(52, 211, 153, 0.3);
+        }
+
         .task-actions {
             display: flex;
             flex-direction: column;
@@ -869,7 +895,8 @@
                     priority: (get('priority') || 'medium').toLowerCase(),
                     category: get('category') || get('type') || 'Other',
                     completed: ['complete', 'completed', 'done'].includes(status),
-                    isAssigned: assignees.length > 0
+                    isAssigned: assignees.length > 0,
+                    deliverables: get('deliverable') || get('link') || ''
                 };
             }).filter(t => t.name && !t.completed);
         }
@@ -1077,6 +1104,13 @@
                                 <span>⚡ ${t.priority.charAt(0).toUpperCase() + t.priority.slice(1)} priority</span>
                                 ${t.isAssigned ? `<span>👤 ${esc(t.assignee)}</span>` : ''}
                             </div>
+                            ${t.deliverables ? `
+                                <div class="task-deliverables">
+                                    ${t.deliverables.split(',').map((link, i) => 
+                                        `<a href="${esc(link.trim())}" target="_blank" class="deliverable-link">📎 ${t.deliverables.split(',').length > 1 ? 'Link ' + (i+1) : 'View Deliverable'}</a>`
+                                    ).join(' ')}
+                                </div>
+                            ` : ''}
                         </div>
                         <div class="task-actions">
                             <div class="lead-info">
