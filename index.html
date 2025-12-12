@@ -649,6 +649,19 @@
                 </select>
             </div>
             <div class="filter-group">
+                <span class="filter-label">Category</span>
+                <select class="filter-select" id="filter-category" onchange="applyFilters()">
+                    <option value="">All Categories</option>
+                    <option value="Data Entry">Data Entry</option>
+                    <option value="HR">HR</option>
+                    <option value="Bookkeeping">Bookkeeping</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Creative">Creative</option>
+                    <option value="Research">Research</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="filter-group">
                 <span class="filter-label">Priority</span>
                 <select class="filter-select" id="filter-priority" onchange="applyFilters()">
                     <option value="">All</option>
@@ -938,6 +951,9 @@
             document.querySelectorAll('.category-pill').forEach(p => {
                 p.classList.toggle('active', p.dataset.category === cat);
             });
+            // Sync dropdown
+            const dropdown = document.getElementById('filter-category');
+            dropdown.value = (cat === 'all') ? '' : cat;
             renderTasks();
         }
 
@@ -947,16 +963,32 @@
             state.filters.status = document.getElementById('filter-status').value;
             state.filters.due = document.getElementById('filter-due').value;
             state.filters.search = document.getElementById('search-input').value.toLowerCase();
+            
+            // Sync category dropdown with pills
+            const categoryDropdown = document.getElementById('filter-category').value;
+            if (categoryDropdown) {
+                state.filters.category = categoryDropdown;
+                // Update pills to match
+                document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
+                const matchingPill = document.querySelector(`.category-pill[data-category="${categoryDropdown}"]`);
+                if (matchingPill) matchingPill.classList.add('active');
+            }
+            
             renderTasks();
         }
 
         function clearFilters() {
             document.getElementById('filter-client').value = '';
+            document.getElementById('filter-category').value = '';
             document.getElementById('filter-priority').value = '';
             document.getElementById('filter-status').value = '';
             document.getElementById('filter-due').value = '';
             document.getElementById('search-input').value = '';
-            state.filters = { category: state.filters.category, client: '', priority: '', status: '', due: '', search: '' };
+            state.filters = { category: 'all', client: '', priority: '', status: '', due: '', search: '' };
+            // Reset category pills
+            document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
+            const allPill = document.querySelector('.category-pill[data-category="all"]');
+            if (allPill) allPill.classList.add('active');
             renderTasks();
         }
 
