@@ -100,6 +100,7 @@
             display: flex;
             align-items: center;
             gap: 0.3rem;
+            text-decoration: none;
         }
 
         .btn-primary {
@@ -182,6 +183,7 @@
         .stat-value.emerald { color: var(--accent-emerald); }
         .stat-value.sky { color: var(--accent-sky); }
         .stat-value.rose { color: var(--accent-rose); }
+        .stat-value.violet { color: var(--accent-violet); }
 
         .stat-label {
             font-size: 0.65rem;
@@ -329,10 +331,6 @@
             transform: translateY(-1px);
         }
 
-        .task-card.assigned {
-            opacity: 0.6;
-        }
-
         .task-priority {
             width: 4px;
             height: 100%;
@@ -379,14 +377,14 @@
             font-weight: 600;
         }
 
-        .task-status.unassigned {
+        .task-status.available {
             background: rgba(52,211,153,0.15);
             color: var(--accent-emerald);
         }
 
-        .task-status.assigned {
-            background: rgba(156,163,175,0.15);
-            color: var(--text-muted);
+        .task-status.not-started {
+            background: rgba(167,139,250,0.15);
+            color: var(--accent-violet);
         }
 
         .task-title {
@@ -489,100 +487,6 @@
             color: var(--text-secondary);
         }
 
-        /* Setup Panel */
-        .setup-panel {
-            background: var(--bg-card);
-            border: 1px solid var(--border-accent);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            display: none;
-        }
-
-        .setup-panel.active { display: block; }
-
-        .setup-title {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--accent-gold);
-            margin-bottom: 0.5rem;
-        }
-
-        .setup-description {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-bottom: 1rem;
-        }
-
-        .sheets-config {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .sheet-row {
-            display: grid;
-            grid-template-columns: 180px 1fr 80px auto;
-            gap: 0.5rem;
-            align-items: center;
-            padding: 0.5rem;
-            background: var(--bg-secondary);
-            border-radius: 6px;
-        }
-
-        .form-input {
-            padding: 0.45rem 0.65rem;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-subtle);
-            border-radius: 5px;
-            color: var(--text-primary);
-            font-size: 0.75rem;
-            font-family: 'DM Sans', sans-serif;
-        }
-
-        .color-input {
-            width: 100%;
-            height: 30px;
-            padding: 0;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .remove-btn {
-            background: none;
-            border: none;
-            color: var(--accent-rose);
-            cursor: pointer;
-            font-size: 1rem;
-            padding: 0.25rem 0.5rem;
-        }
-
-        .add-btn {
-            background: transparent;
-            border: 1px dashed var(--border-subtle);
-            border-radius: 6px;
-            padding: 0.5rem;
-            color: var(--text-muted);
-            font-size: 0.7rem;
-            cursor: pointer;
-            width: fit-content;
-        }
-
-        .add-btn:hover {
-            border-color: var(--accent-gold);
-            color: var(--accent-gold);
-        }
-
-        .setup-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border-subtle);
-        }
-
         /* Responsive */
         @media (max-width: 900px) {
             .task-card {
@@ -607,7 +511,6 @@
             .filter-group { width: 100%; }
             .filter-select { width: 100%; }
             .search-box { max-width: none; }
-            .sheet-row { grid-template-columns: 1fr; }
         }
 
         ::-webkit-scrollbar { width: 6px; }
@@ -627,8 +530,8 @@
                     <span class="status-dot" id="status-dot"></span>
                     <span id="status-text">Not connected</span>
                 </div>
-                <button class="btn-icon" onclick="refreshAll()" title="Refresh">↻</button>
-                <button class="btn btn-secondary" onclick="loadAllData()">↻</button>
+                <button class="btn-icon" onclick="loadData()" title="Refresh">↻</button>
+                <a class="btn btn-primary" id="sheet-link" href="#" target="_blank" style="display: none;">📊 Sheet</a>
             </div>
         </header>
 
@@ -637,27 +540,27 @@
             <div class="welcome-icon">👋</div>
             <div class="welcome-content">
                 <h2>Welcome to the Task Marketplace!</h2>
-                <p>Browse available tasks below. Filter by category to find work that matches your skills. Click "Message Lead" to request a task.</p>
+                <p>Browse available tasks below. Filter by category to find work that matches your skills. Click "Request Task" to contact the project lead.</p>
             </div>
         </div>
 
         <!-- Stats Bar -->
         <div class="stats-bar" id="stats-bar" style="display: none;">
             <div class="stat-card">
-                <div class="stat-value gold" id="stat-total">0</div>
-                <div class="stat-label">Total Tasks</div>
+                <div class="stat-value gold" id="stat-available">0</div>
+                <div class="stat-label">Available Tasks</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value emerald" id="stat-available">0</div>
-                <div class="stat-label">Available</div>
+                <div class="stat-value rose" id="stat-overdue">0</div>
+                <div class="stat-label">Overdue</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value sky" id="stat-assigned">0</div>
-                <div class="stat-label">Assigned</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value rose" id="stat-urgent">0</div>
+                <div class="stat-value emerald" id="stat-week">0</div>
                 <div class="stat-label">Due This Week</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value violet" id="stat-clients">0</div>
+                <div class="stat-label">Clients</div>
             </div>
         </div>
 
@@ -675,33 +578,12 @@
                 </select>
             </div>
             <div class="filter-group">
-                <span class="filter-label">Category</span>
-                <select class="filter-select" id="filter-category" onchange="applyFilters()">
-                    <option value="">All Categories</option>
-                    <option value="Data Entry">Data Entry</option>
-                    <option value="HR">HR</option>
-                    <option value="Bookkeeping">Bookkeeping</option>
-                    <option value="Admin">Admin</option>
-                    <option value="Creative">Creative</option>
-                    <option value="Research">Research</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
-            <div class="filter-group">
                 <span class="filter-label">Priority</span>
                 <select class="filter-select" id="filter-priority" onchange="applyFilters()">
                     <option value="">All</option>
                     <option value="high">High</option>
                     <option value="medium">Medium</option>
                     <option value="low">Low</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <span class="filter-label">Status</span>
-                <select class="filter-select" id="filter-status" onchange="applyFilters()">
-                    <option value="">All</option>
-                    <option value="unassigned">Available Only</option>
-                    <option value="assigned">Assigned Only</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -729,109 +611,116 @@
     </div>
 
     <script>
-        /* ================================================================
-           CONFIGURATION
-           ================================================================ */
-        
-        const CONFIG_KEY = 'ipc-task-marketplace';
-        
-        const DEFAULT_CONFIG = {
-            sheets: [
-                { name: 'IPC-IEF Operations', sheetId: '1_AAjePsJq1u2KlAWm8ol_0iQkK16_WJl', color: '#d4a853' },
-                { name: 'Treehouse Therapies', sheetId: '1JE6ngi9t8oNKPqZ3I_NjrC90WCdkmVNr', color: '#4A90A4' },
-                { name: 'In Reach Therapy', sheetId: '1Pp-brDjxPdstNGEnQOOuWa90flXL72tw', color: '#6B8E23' }
-            ]
+        // Configuration
+        const CONFIG = {
+            SHEET_ID: '1vZSLqWO88_GyscAqwVoeVLGwb6FT1JKMCxOR8maU-9I',
+            PROGRAMS_TAB: 'Programs',
+            TASKS_TAB: 'Tasks',
+            TEAM_TAB: 'Team'
         };
-        
-        let config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+
+        // Client colors
+        const CLIENT_COLORS = {
+            'IPC': '#d4a853',
+            'IEF': '#2dd4bf',
+            'Treehouse Therapies': '#4A90A4',
+            'In Reach Therapy': '#6B8E23',
+            'Liberation Firearms': '#8B4513',
+            'Central Oregon Locavore': '#2E8B57'
+        };
+        const DEFAULT_COLOR = '#a78bfa';
+
+        function getClientColor(clientName) {
+            return CLIENT_COLORS[clientName] || DEFAULT_COLOR;
+        }
 
         let state = {
-            allTasks: [],
+            programs: [],
+            allTasks: [],      // All available tasks
+            team: [],
+            leads: {},         // Lead name -> contact info
             categories: [],
-            leads: {},
-            filters: { category: 'all', client: '', priority: '', status: '', due: '', search: '' }
+            clients: [],
+            filters: { category: 'all', client: '', priority: '', due: '', search: '' }
         };
 
         // Init
         document.addEventListener('DOMContentLoaded', () => {
-            loadConfig();
-            loadAllData();
+            loadData();
         });
-        
-        function loadAllData() {
-            if (config.sheets.length > 0 && config.sheets[0].sheetId) {
-                connectAll();
-            }
-        }
 
-        function loadConfig() {
-            // Always use hardcoded DEFAULT_CONFIG - skip localStorage
-            config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
-        }
-
-        function saveConfig() {
-            localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
-        }
-
-        /* ================================================================
-           SETUP UI
-           ================================================================ */
-
-        /* ================================================================
-           DATA LOADING
-           ================================================================ */
-
-        async function connectAll() {
+        // Data Loading
+        async function loadData() {
             updateStatus('connecting');
-            state.allTasks = [];
-            state.leads = {};
-            let connected = 0;
+            try {
+                const [programs, tasks, team] = await Promise.all([
+                    fetchSheet(CONFIG.SHEET_ID, CONFIG.PROGRAMS_TAB),
+                    fetchSheet(CONFIG.SHEET_ID, CONFIG.TASKS_TAB),
+                    fetchSheet(CONFIG.SHEET_ID, CONFIG.TEAM_TAB)
+                ]);
 
-            for (const sheet of config.sheets) {
-                try {
-                    const [programs, tasks, team] = await Promise.all([
-                        fetchSheet(sheet.sheetId, 'Programs'),
-                        fetchSheet(sheet.sheetId, 'Tasks'),
-                        fetchSheet(sheet.sheetId, 'Team')
-                    ]);
+                state.programs = parsePrograms(programs);
+                state.team = parseTeam(team);
+                
+                // Build leads lookup from team
+                state.leads = {};
+                state.team.forEach(t => {
+                    state.leads[t.name.toLowerCase()] = t;
+                });
+                // Add program leads
+                state.programs.forEach(p => {
+                    if (p.lead && !state.leads[p.lead.toLowerCase()]) {
+                        state.leads[p.lead.toLowerCase()] = { name: p.lead, contact: '' };
+                    }
+                });
 
-                    const programsData = parsePrograms(programs);
-                    const tasksData = parseTasks(tasks);
-                    const teamData = parseTeam(team);
+                // Parse and filter tasks to AVAILABLE only
+                const allTasks = parseTasks(tasks);
+                state.allTasks = allTasks.filter(t => {
+                    const status = (t.status || '').toLowerCase();
+                    const assignee = t.assignee || '';
+                    
+                    // Available = no assignee OR status is "not started"
+                    // Exclude completed tasks
+                    const isCompleted = ['complete', 'completed', 'done'].includes(status);
+                    const isAvailable = !assignee || status === 'not started';
+                    
+                    return !isCompleted && isAvailable;
+                });
 
-                    // Store leads
-                    teamData.forEach(t => {
-                        state.leads[t.name.toLowerCase()] = t;
-                    });
-                    programsData.forEach(p => {
-                        if (p.lead && !state.leads[p.lead.toLowerCase()]) {
-                            state.leads[p.lead.toLowerCase()] = { name: p.lead, contact: '' };
-                        }
-                    });
+                // Link tasks to programs for lead info
+                state.allTasks.forEach(t => {
+                    const program = state.programs.find(p => 
+                        p.name && t.programName && 
+                        p.name.toLowerCase() === t.programName.toLowerCase() &&
+                        p.client === t.client
+                    );
+                    t.lead = program?.lead || '';
+                    t.clientColor = getClientColor(t.client);
+                });
 
-                    // Add client info to tasks
-                    tasksData.forEach(t => {
-                        const program = programsData.find(p => p.name.toLowerCase() === t.programName.toLowerCase());
-                        t.clientName = sheet.name;
-                        t.clientColor = sheet.color;
-                        t.lead = program?.lead || '';
-                        state.allTasks.push(t);
-                    });
+                // Get unique clients and categories
+                state.clients = [...new Set(state.allTasks.map(t => t.client))].filter(Boolean).sort();
 
-                    connected++;
-                } catch (e) {
-                    console.error(`Failed to load ${sheet.name}:`, e);
-                }
-            }
-
-            if (connected > 0) {
-                updateStatus('connected', connected);
+                updateStatus('connected');
+                document.getElementById('sheet-link').href = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/edit`;
+                document.getElementById('sheet-link').style.display = 'flex';
+                
                 buildCategories();
                 populateFilters();
                 showDashboard();
                 renderTasks();
-            } else {
+            } catch (e) {
+                console.error(e);
                 updateStatus('error');
+                document.getElementById('tasks-grid').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <h3>Connection Failed</h3>
+                        <p>Check that the Google Sheet is published to web.</p>
+                        <p style="font-size: 0.7rem; margin-top: 0.5rem; color: var(--accent-rose)">${e.message}</p>
+                    </div>
+                `;
             }
         }
 
@@ -845,12 +734,10 @@
         }
 
         function getHeaders(table) {
-            // Check if column labels exist
             const colLabels = table.cols.map(c => (c.label || '').toLowerCase()).filter(Boolean);
             if (colLabels.length > 0) {
                 return { headers: table.cols.map(c => (c.label || '').toLowerCase()), dataRows: table.rows };
             }
-            // Use first row as headers
             if (table.rows && table.rows.length > 0) {
                 const headers = table.rows[0].c.map(cell => (cell && cell.v ? String(cell.v) : '').toLowerCase());
                 return { headers, dataRows: table.rows.slice(1) };
@@ -867,6 +754,7 @@
                     return idx >= 0 && row.c[idx] ? (row.c[idx].v || row.c[idx].f || '') : '';
                 };
                 return {
+                    client: get('client') || '',
                     name: get('program') || get('project') || get('name'),
                     lead: get('lead') || get('owner')
                 };
@@ -883,22 +771,25 @@
                 };
                 const status = (get('status') || '').toLowerCase();
                 const assigneeRaw = get('assign') || get('owner') || '';
-                // Handle multi-select (comma-separated or chip format)
                 const assignees = assigneeRaw.split(',').map(a => a.trim()).filter(Boolean);
+                const categoryRaw = get('category') || get('type') || '';
+                const categories = categoryRaw.split(',').map(c => c.trim()).filter(Boolean);
+                
                 return {
                     id: i + 1,
+                    client: get('client') || '',
                     programName: get('program') || get('project'),
                     name: get('task') || get('name'),
                     assignee: assignees.join(', '),
                     assignees: assignees,
                     dueDate: get('due'),
                     priority: (get('priority') || 'medium').toLowerCase(),
-                    category: get('category') || get('type') || 'Other',
-                    completed: ['complete', 'completed', 'done'].includes(status),
-                    isAssigned: assignees.length > 0,
+                    category: categories[0] || 'Other',
+                    categories: categories,
+                    status: status,
                     deliverables: get('deliverable') || get('link') || ''
                 };
-            }).filter(t => t.name && !t.completed);
+            }).filter(t => t.name && t.client);
         }
 
         function parseTeam(table) {
@@ -919,22 +810,13 @@
             }).filter(t => t && t.name);
         }
 
-        function refreshAll() {
-            if (config.sheets.length > 0) {
-                connectAll();
-            }
-        }
-
-        /* ================================================================
-           UI FUNCTIONS
-           ================================================================ */
-
-        function updateStatus(s, count = 0) {
+        // UI Functions
+        function updateStatus(s) {
             const dot = document.getElementById('status-dot');
             const txt = document.getElementById('status-text');
             dot.className = 'status-dot';
             if (s === 'connecting') { txt.textContent = 'Connecting...'; }
-            else if (s === 'connected') { dot.classList.add('connected'); txt.textContent = `${count} sheets connected`; }
+            else if (s === 'connected') { dot.classList.add('connected'); txt.textContent = 'Connected'; }
             else if (s === 'error') { dot.classList.add('error'); txt.textContent = 'Connection failed'; }
             else { txt.textContent = 'Not connected'; }
         }
@@ -959,18 +841,17 @@
                     All Tasks <span class="count">${state.allTasks.length}</span>
                 </button>
                 ${state.categories.map(([cat, count]) => `
-                    <button class="category-pill" data-category="${cat}" onclick="filterCategory('${cat}')">
-                        ${cat} <span class="count">${count}</span>
+                    <button class="category-pill" data-category="${cat}" onclick="filterCategory('${esc(cat)}')">
+                        ${esc(cat)} <span class="count">${count}</span>
                     </button>
                 `).join('')}
             `;
         }
 
         function populateFilters() {
-            const clients = [...new Set(state.allTasks.map(t => t.clientName))].sort();
             document.getElementById('filter-client').innerHTML = 
                 '<option value="">All Clients</option>' + 
-                clients.map(c => `<option value="${c}">${c}</option>`).join('');
+                state.clients.map(c => `<option value="${c}">${c}</option>`).join('');
         }
 
         function filterCategory(cat) {
@@ -978,40 +859,23 @@
             document.querySelectorAll('.category-pill').forEach(p => {
                 p.classList.toggle('active', p.dataset.category === cat);
             });
-            // Sync dropdown
-            const dropdown = document.getElementById('filter-category');
-            dropdown.value = (cat === 'all') ? '' : cat;
             renderTasks();
         }
 
         function applyFilters() {
             state.filters.client = document.getElementById('filter-client').value;
             state.filters.priority = document.getElementById('filter-priority').value;
-            state.filters.status = document.getElementById('filter-status').value;
             state.filters.due = document.getElementById('filter-due').value;
             state.filters.search = document.getElementById('search-input').value.toLowerCase();
-            
-            // Sync category dropdown with pills
-            const categoryDropdown = document.getElementById('filter-category').value;
-            if (categoryDropdown) {
-                state.filters.category = categoryDropdown;
-                // Update pills to match
-                document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
-                const matchingPill = document.querySelector(`.category-pill[data-category="${categoryDropdown}"]`);
-                if (matchingPill) matchingPill.classList.add('active');
-            }
-            
             renderTasks();
         }
 
         function clearFilters() {
             document.getElementById('filter-client').value = '';
-            document.getElementById('filter-category').value = '';
             document.getElementById('filter-priority').value = '';
-            document.getElementById('filter-status').value = '';
             document.getElementById('filter-due').value = '';
             document.getElementById('search-input').value = '';
-            state.filters = { category: 'all', client: '', priority: '', status: '', due: '', search: '' };
+            state.filters = { category: 'all', client: '', priority: '', due: '', search: '' };
             // Reset category pills
             document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
             const allPill = document.querySelector('.category-pill[data-category="all"]');
@@ -1026,23 +890,23 @@
 
             return state.allTasks.filter(t => {
                 if (state.filters.category !== 'all' && t.category !== state.filters.category) return false;
-                if (state.filters.client && t.clientName !== state.filters.client) return false;
+                if (state.filters.client && t.client !== state.filters.client) return false;
                 if (state.filters.priority && t.priority !== state.filters.priority) return false;
-                if (state.filters.status === 'unassigned' && t.isAssigned) return false;
-                if (state.filters.status === 'assigned' && !t.isAssigned) return false;
                 
                 if (state.filters.due && t.dueDate) {
                     const due = new Date(t.dueDate);
                     if (state.filters.due === 'overdue' && due >= today) return false;
-                    if (state.filters.due === 'week' && due > weekEnd) return false;
-                    if (state.filters.due === 'month' && due > monthEnd) return false;
+                    if (state.filters.due === 'week' && (due < today || due > weekEnd)) return false;
+                    if (state.filters.due === 'month' && (due < today || due > monthEnd)) return false;
+                } else if (state.filters.due === 'overdue') {
+                    return false; // No due date = not overdue
                 }
 
                 if (state.filters.search) {
                     const s = state.filters.search;
                     if (!t.name.toLowerCase().includes(s) && 
                         !t.programName.toLowerCase().includes(s) &&
-                        !t.clientName.toLowerCase().includes(s) &&
+                        !t.client.toLowerCase().includes(s) &&
                         !(t.category || '').toLowerCase().includes(s)) return false;
                 }
 
@@ -1056,102 +920,90 @@
             const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 7);
 
             // Update stats
-            document.getElementById('stat-total').textContent = state.allTasks.length;
-            document.getElementById('stat-available').textContent = state.allTasks.filter(t => !t.isAssigned).length;
-            document.getElementById('stat-assigned').textContent = state.allTasks.filter(t => t.isAssigned).length;
-            document.getElementById('stat-urgent').textContent = state.allTasks.filter(t => 
-                t.dueDate && new Date(t.dueDate) <= weekEnd && !t.isAssigned
-            ).length;
+            const overdue = state.allTasks.filter(t => t.dueDate && new Date(t.dueDate) < today).length;
+            const dueWeek = state.allTasks.filter(t => t.dueDate && new Date(t.dueDate) >= today && new Date(t.dueDate) <= weekEnd).length;
+            
+            document.getElementById('stat-available').textContent = state.allTasks.length;
+            document.getElementById('stat-overdue').textContent = overdue;
+            document.getElementById('stat-week').textContent = dueWeek;
+            document.getElementById('stat-clients').textContent = state.clients.length;
 
             if (!tasks.length) {
                 document.getElementById('tasks-grid').innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-state-icon">🔍</div>
-                        <h3>No tasks match your filters</h3>
-                        <p>Try adjusting your filters or browse all tasks.</p>
+                        <div class="empty-state-icon">🎉</div>
+                        <h3>No available tasks</h3>
+                        <p>All tasks are currently assigned or completed. Check back later!</p>
                     </div>
                 `;
                 return;
             }
 
-            // Sort: unassigned first, then by due date
+            // Sort: overdue first, then by due date, then by priority
             tasks.sort((a, b) => {
-                if (a.isAssigned !== b.isAssigned) return a.isAssigned ? 1 : -1;
+                const aOverdue = a.dueDate && new Date(a.dueDate) < today;
+                const bOverdue = b.dueDate && new Date(b.dueDate) < today;
+                if (aOverdue !== bOverdue) return aOverdue ? -1 : 1;
                 if (a.dueDate && b.dueDate) return new Date(a.dueDate) - new Date(b.dueDate);
-                return a.dueDate ? -1 : 1;
+                if (a.dueDate) return -1;
+                if (b.dueDate) return 1;
+                const priorityOrder = { high: 0, medium: 1, low: 2 };
+                return (priorityOrder[a.priority] || 1) - (priorityOrder[b.priority] || 1);
             });
 
             document.getElementById('tasks-grid').innerHTML = tasks.map(t => {
                 const isOverdue = t.dueDate && new Date(t.dueDate) < today;
                 const isSoon = !isOverdue && t.dueDate && new Date(t.dueDate) <= weekEnd;
                 const lead = state.leads[t.lead?.toLowerCase()] || { name: t.lead, contact: '' };
+                const statusLabel = t.status === 'not started' ? 'Not Started' : 'Available';
+                const statusClass = t.status === 'not started' ? 'not-started' : 'available';
 
                 return `
-                    <div class="task-card ${t.isAssigned ? 'assigned' : ''}">
+                    <div class="task-card">
                         <div class="task-priority ${t.priority}"></div>
                         <div class="task-content">
                             <div class="task-header">
-                                <span class="task-client" style="background: ${t.clientColor}20; color: ${t.clientColor}">${esc(t.clientName)}</span>
+                                <span class="task-client" style="background: ${t.clientColor}20; color: ${t.clientColor}">${esc(t.client)}</span>
                                 <span class="task-category">${esc(t.category || 'Other')}</span>
-                                <span class="task-status ${t.isAssigned ? 'assigned' : 'unassigned'}">
-                                    ${t.isAssigned ? '● Assigned' : '○ Available'}
-                                </span>
+                                <span class="task-status ${statusClass}">○ ${statusLabel}</span>
                             </div>
                             <div class="task-title">${esc(t.name)}</div>
                             <div class="task-project">📁 ${esc(t.programName)}</div>
                             <div class="task-meta">
-                                ${t.dueDate ? `<span class="task-due ${isOverdue ? 'overdue' : ''} ${isSoon ? 'soon' : ''}">📅 ${fmtDate(t.dueDate)}${isOverdue ? ' (overdue)' : ''}</span>` : ''}
+                                ${t.dueDate ? `<span class="task-due ${isOverdue ? 'overdue' : ''} ${isSoon ? 'soon' : ''}">📅 ${fmtDate(t.dueDate)}${isOverdue ? ' (overdue)' : ''}</span>` : '<span>📅 No due date</span>'}
                                 <span>⚡ ${t.priority.charAt(0).toUpperCase() + t.priority.slice(1)} priority</span>
-                                ${t.isAssigned ? `<span>👤 ${esc(t.assignee)}</span>` : ''}
                             </div>
-                            ${t.deliverables ? `
-                                <div class="task-deliverables">
-                                    ${t.deliverables.split(',').map((link, i) => 
-                                        `<a href="${esc(link.trim())}" target="_blank" class="deliverable-link">📎 ${t.deliverables.split(',').length > 1 ? 'Link ' + (i+1) : 'View Deliverable'}</a>`
-                                    ).join(' ')}
-                                </div>
-                            ` : ''}
                         </div>
                         <div class="task-actions">
                             <div class="lead-info">
                                 <div class="lead-name">${esc(lead.name || 'No lead')}</div>
                                 <div class="lead-label">Project Lead</div>
                             </div>
-                            ${lead.name && lead.contact ? `
+                            ${lead.name ? `
                                 <div class="contact-buttons">
-                                    <button class="btn btn-message" onclick="openChat('${esc(lead.contact)}', '${esc(t.name)}', '${esc(t.clientName)}')">💬 Chat</button>
-                                    <button class="btn btn-message" style="background: linear-gradient(135deg, var(--accent-sky), var(--accent-violet));" onclick="openEmail('${esc(lead.contact)}', '${esc(t.name)}', '${esc(t.clientName)}')">📧 Email</button>
+                                    <button class="btn btn-message" onclick="requestTask('${esc(t.name)}', '${esc(t.client)}', '${esc(lead.contact || lead.name)}')">📧 Request Task</button>
                                 </div>
-                            ` : lead.name ? `<span style="font-size: 0.6rem; color: var(--text-muted);">No contact info</span>` : ''}
+                            ` : ''}
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        function openChat(contact, taskName, clientName) {
-            const message = encodeURIComponent(`Hi! I have some availability and would like to help with the task "${taskName}" for ${clientName}. Is this still available?`);
-            
-            if (contact.includes('@')) {
-                // Open Google Chat DM with email
-                window.open(`https://mail.google.com/chat/dm/${contact}?text=${message}`, '_blank');
-            } else {
-                // Copy message to clipboard
-                const fullMessage = `Hi! I have some availability and would like to help with the task "${taskName}" for ${clientName}. Is this still available?`;
-                navigator.clipboard.writeText(fullMessage).then(() => {
-                    alert(`Message copied!\n\nSend via Google Chat to: ${contact}`);
-                });
-            }
-        }
-
-        function openEmail(contact, taskName, clientName) {
-            const subject = encodeURIComponent(`Task Request: ${taskName} - ${clientName}`);
+        function requestTask(taskName, clientName, leadContact) {
+            const subject = encodeURIComponent(`Task Request: ${taskName}`);
             const body = encodeURIComponent(`Hi!\n\nI have some availability and would like to help with the task "${taskName}" for ${clientName}.\n\nIs this still available?\n\nThanks!`);
             
-            if (contact.includes('@')) {
-                window.open(`mailto:${contact}?subject=${subject}&body=${body}`, '_blank');
+            if (leadContact && leadContact.includes('@')) {
+                window.location.href = `mailto:${leadContact}?subject=${subject}&body=${body}`;
             } else {
-                alert(`Please email: ${contact}\n\nSubject: Task Request: ${taskName}`);
+                // Copy message to clipboard
+                const message = `Hi! I have some availability and would like to help with the task "${taskName}" for ${clientName}. Is this still available?`;
+                navigator.clipboard.writeText(message).then(() => {
+                    alert(`Message copied to clipboard!\n\nSend to: ${leadContact || 'Project Lead'}\n\nSubject: Task Request: ${taskName}`);
+                }).catch(() => {
+                    alert(`Please contact: ${leadContact || 'Project Lead'}\n\nSubject: Task Request: ${taskName}`);
+                });
             }
         }
 
